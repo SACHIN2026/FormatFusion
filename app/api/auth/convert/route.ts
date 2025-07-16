@@ -1,15 +1,17 @@
 import { authOptions } from "@/lib/auth";
 import { dbconnect } from "@/lib/db";
-import { error } from "console";
-import { mkdir } from "fs";
-import { writeFile } from "fs/promises";
-import { url } from "inspector";
+import { writeFile, mkdir } from "fs/promises";
+import {v2 as cloudinary} from "cloudinary"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import path from "path";
 import Image from "@/models/Image";
 
+
+cloudinary.config({
+    secure: true,
+})
 
 export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -55,10 +57,10 @@ export async function POST(request: NextRequest) {
     const originalSize = buffer.length;
     const fileName = `${Date.now()}-${file.name.split('.')[0]}`;
 
-    //upload dir
+    // //upload dir
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
+    // const uploadDir = path.join(process.cwd(), "public", "uploads");
+    // await mkdir(uploadDir, { recursive: true });
 
     // convert image
     try {
@@ -95,17 +97,38 @@ export async function POST(request: NextRequest) {
                     { status: 400 }
                 );
 
-        }
+        };
 
-        // save processed image
-        const outputPath = path.join(uploadDir, `${fileName}.${format}`);
-        await writeFile(outputPath, processedImage);
+        // // save processed image
+        // const outputPath = path.join(uploadDir, `${fileName}.${format}`);
+        // await writeFile(outputPath, processedImage);
+        
+
+        //Upload to cloudinary
+        const b64 = Buffer.from(processedImage).toString("base64");
+        const dataUri = `data:image/${format};base64,${b64}`;
+
+        const cloudinaryResponse = await new Promise((resolve, reject)=>{
+            cloudinary.uploader.upload(dataUri, {
+                folder: "image-converter",
+                public_id: fileName,
+                format: format,
+            },
+            (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            }
+            )
+        })
 
         //save to db
 
         await dbconnect();
         const newImage = await Image.create({
-            url: `/uploads/${fileName}.${format}`,
+            url: (cloudinaryResponse as any).secure_url,
             userId: session.user.id,
             beforeFormat: originalFormat,
             afterFormat: format,
@@ -125,7 +148,7 @@ export async function POST(request: NextRequest) {
             beforeSize: newImage.beforeSize,
             afterSize: newImage.afterSize,
             quality: newImage.quality,
-            CompressionRate : Math.round((1 - (newImage.afterSize / newImage.beforeSize)) * 100),
+            compressionRate : Math.round((1 - (newImage.afterSize / newImage.beforeSize)) * 100),
         },{
             status: 200
         })
