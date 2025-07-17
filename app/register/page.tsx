@@ -1,4 +1,5 @@
 "use client"
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
@@ -7,7 +8,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-import { set } from 'mongoose';
 
 function RegisterPage() {
     const [name, setName] = useState('');
@@ -23,7 +23,7 @@ function RegisterPage() {
         try {
             // react-query
             // loading, error, debounce
-            const response = await fetch('api/auth/register', {
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -44,7 +44,8 @@ function RegisterPage() {
 
 
         } catch (error: any) {
-            console.error("Registration failed:", error);
+            // console.error("Registration failed:", error);
+            toast.error(error.message || "Registration failed. Please try again");
             return;
 
         } finally {
@@ -91,12 +92,15 @@ function RegisterPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
+                                    className='pr-10'
                                 />
                             </div>
-                            <div className='space-y-2'>
-                                <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
-                                    Password
-                                </label>
+                        </div>
+                        <div className='space-y-2'>
+                            <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
+                                Password
+                            </label>
+                            <div className='relative'>
                                 <Input
                                     id='password'
                                     type={showPassword ? 'text' : 'password'}
@@ -104,21 +108,23 @@ function RegisterPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     minLength={6}
+                                    className='pr-10'
                                     required
                                 />
 
-                                <Button
+                                <button
                                     type='button'
                                     className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700'
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </Button>
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
                             </div>
-
-
-                            <p className='text-sm text-red-500'> Password must be at least 6 characters</p>
+                            <p className='text-sm text-gray-500'> Password must be at least 6 characters</p>
                         </div>
+
+
+
                         <Button
                             type='submit'
                             disabled={!email || !password || !name || loading}
@@ -135,7 +141,7 @@ function RegisterPage() {
                             Login
                         </Link>
                     </p>
-                    
+
                 </CardFooter>
             </Card>
 
