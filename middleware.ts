@@ -12,10 +12,16 @@ export default withAuth(
                 if(
                     pathname.startsWith("api/auth") ||
                     pathname === "/login" ||
-                    pathname === "/register" 
-                )
+                    pathname === "/register" ||
+                    pathname === "/about" ||
+                    pathname === "/convert"
+                    // pathname === "/" ||
+                    // pathname.startsWith("/api/images")
+                ){
+                    return true;
+                }
 
-                return true;
+                // return true;
 
                 if(pathname === "/" || pathname.startsWith("/api/images")){
                     return true;
