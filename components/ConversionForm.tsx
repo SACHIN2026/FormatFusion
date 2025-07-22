@@ -7,9 +7,11 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Progress } from './ui/progress';
 import { ArrowRight, Upload, Download, RefreshCw } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { totalmem } from 'os';
 
 const ConversionForm = () => {
-
+    const { data: session } = useSession();
     const [format, setFormat] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [quality, setQuality] = useState(80);
@@ -20,6 +22,7 @@ const ConversionForm = () => {
 
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; 
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) {
             // alert("No file selected");
@@ -28,6 +31,11 @@ const ConversionForm = () => {
 
         if (!selectedFile.type.startsWith('image/')) {
             toast.error("Please select an image file");
+            return;
+        }
+
+        if(selectedFile.size>MAX_FILE_SIZE){
+            toast.error(`File is too large (${(selectedFile.size/(1024 * 1024)).toFixed(2)}MB). Max size is 10MB allowed.`);
             return;
         }
 
@@ -107,6 +115,10 @@ const ConversionForm = () => {
             // setLoading(false);
             toast.success("Conversion successful");
 
+            if(session){
+                await saveToHistory(data);
+            }
+
         } catch (error) {
             // console.error("Conversion error:", error);
             toast.error("Conversion failed. Please try again.");
@@ -142,6 +154,35 @@ const ConversionForm = () => {
         const filename = `converted-image.${result.afterFormat}`;
         window.location.href = `/api/download?url=${encodeURIComponent(result.url)}&filename=${encodeURIComponent(filename)}`;
     };
+
+
+
+    const saveToHistory = async (result: any) => {
+        try {
+            const res = await fetch("/api/history", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: result.url,
+                    beforeFormat: result.beforeFormat,
+                    afterFormat: result.afterFormat,
+                    name: file?.name || "Converted Image",
+                    beforeSize: result.beforeSize,
+                    afterSize: result.afterSize
+                }),
+            })
+
+            if (!res.ok) {
+                throw new Error("Failed to save to history");
+            }
+            // const data = await res.json();
+            toast.success("Image saved to history");
+        } catch (error) {
+            toast.error("Failed to save to history");
+        }
+    }
 
     return (
         <div className='space-y-6'>
