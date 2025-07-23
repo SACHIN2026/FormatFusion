@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from 'sonner';
 
 
+
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -33,7 +34,7 @@ function LoginPage() {
             else {
                 toast.success("Login successful");
                 // Redirect to home or dashboard
-                setTimeout(() => router.push('/'), 500);
+                setTimeout(() => router.push('/convert'), 500);
             }
 
         } catch (error) {
