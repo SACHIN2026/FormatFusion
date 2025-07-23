@@ -9,6 +9,8 @@ export async function DELETE(req: NextRequest,
     {params} : {params: {id:string}}
 ){
     try {
+
+        const id = params.id;
         const session = await getServerSession(authOptions);
 
         if(!session?.user){
@@ -24,7 +26,7 @@ export async function DELETE(req: NextRequest,
 
         await dbconnect();
 
-        const history = await History.findById(params.id);
+        const history = await History.findById(id);
 
         if(!history){
             return NextResponse.json(
@@ -48,7 +50,7 @@ export async function DELETE(req: NextRequest,
             )
         }
 
-        await History.findOneAndDelete({ _id: params.id });
+        await History.findOneAndDelete({ _id:id });
 
         return NextResponse.json(
             {
