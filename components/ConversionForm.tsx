@@ -19,10 +19,10 @@ const ConversionForm = () => {
     const [progress, setProgress] = useState(0);
     const [result, setResult] = useState<any>(null);
     const [preview, setPreview] = useState<string | null>(null);
-
-
+    
+    
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const MAX_FILE_SIZE = 10 * 1024 * 1024; 
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) {
             // alert("No file selected");
@@ -61,6 +61,14 @@ const ConversionForm = () => {
             toast.error("Please select an image file");
             return;
         }
+
+        if(droppedFile.size>MAX_FILE_SIZE){
+            toast.error(`File is too large (${(droppedFile.size/(1024 * 1024)).toFixed(2)}MB). Max size is 10MB allowed.`);
+            return;
+        }
+
+
+
         setFile(droppedFile);
 
         //create preview
