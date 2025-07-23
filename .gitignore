@@ -1,43 +1,87 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
+yarn.lock
+package-lock.json
 
-# testing
+# Testing
 /coverage
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
 
-# misc
-.DS_Store
-*.pem
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Local Netlify folder
+.netlify
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# PWA files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/worker-*.js
+**/public/sw.js.map
+**/public/workbox-*.js.map
+**/public/worker-*.js.map
+
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-New Folder
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary folders
+/tmp
+/temp
+
+# Logs
+logs
+*.log
+
+# Uploaded files (if any temporary storage is used)
+/uploads
+/public/uploads
+
+# Cloudinary temporary files (if any)
+.cloudinary
+
+# Database files
+*.sqlite
+*.db
+
+# Build cache
+.eslintcache
+.stylelintcache
