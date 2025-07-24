@@ -6,11 +6,11 @@ import { authOptions } from "@/lib/auth";
 
 
 export async function DELETE(req: NextRequest,
-    {params} : {params: {id:string}}
+    context: { params: Promise<{ id: string }> }
 ){
     try {
 
-        const id = params.id;
+        const {id} = await context.params;
         const session = await getServerSession(authOptions);
 
         if(!session?.user){

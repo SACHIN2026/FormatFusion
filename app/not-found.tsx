@@ -8,7 +8,7 @@ export default function NotFoundPage() {
                 <h1 className='text-6xl font-bold text-gray-900 mb-2'>404</h1>
                 <h2 className='text-2xl font-medium text-gray-700'>Page Not Found</h2>
                 <p className='text-gray-500 mb-8'>
-                    The page you're looking for doesn't exist or has been moved.
+                    The page you&apos;re looking for doesn&apos;t exist or has been moved.
                 </p>
                 <div className='space-y-3'>
                     <Link href="/">
@@ -16,7 +16,6 @@ export default function NotFoundPage() {
                     </Link>
                     <Link href="/dashboard">
                         <Button variant="outline" className='w-full'> Go To Dashboard
-
                         </Button>
                     </Link>
                 </div>

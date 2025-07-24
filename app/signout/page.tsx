@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card" // Removed unused CardContent
 import { LogOut } from "lucide-react"
-import Link from "next/link"
+// import Link from "next/link" // Removed as Link was unused
 import { useRouter } from "next/navigation"
 
 export default function SignOutPage() {

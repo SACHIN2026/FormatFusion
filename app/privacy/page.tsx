@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function PrivacyPage() {
   return (
     <main className="container mx-auto py-8 px-4 max-w-4xl">
@@ -42,7 +44,7 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-semibold mb-3">Third-Party Services</h2>
           <p className="text-gray-700">
             We use Cloudinary for image processing and storage. Their privacy policy applies to how they handle 
-            your images. You can view Cloudinary's privacy policy at{' '}
+            your images. You can view Cloudinary&apos;s privacy policy at{' '}
             <a href="https://cloudinary.com/privacy" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
               https://cloudinary.com/privacy
             </a>.

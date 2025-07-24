@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function TermsPage() {
   return (
     <main className="container mx-auto py-8 px-4 max-w-4xl">
@@ -14,7 +16,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">2. Description of Service</h2>
           <p className="text-gray-700">
-            ImageConverter provides an online tool for converting images between different formats including JPEG, PNG, WebP, and AVIF. The service is provided "as is" and "as available" without warranties of any kind.
+            ImageConverter provides an online tool for converting images between different formats including JPEG, PNG, WebP, and AVIF. The service is provided &quot;as is&quot; and &quot;as available&quot; without warranties of any kind.
           </p>
         </section>
         
@@ -24,7 +26,7 @@ export default function TermsPage() {
             When using our service, you agree not to:
           </p>
           <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700">
-            <li>Upload images that violate any third party's intellectual property rights</li>
+            <li>Upload images that violate any third party&apos;s intellectual property rights</li>
             <li>Upload illegal, harmful, threatening, abusive, or otherwise objectionable content</li>
             <li>Attempt to disrupt or overload our service</li>
             <li>Use automated means to access or use our service</li>

@@ -1,22 +1,19 @@
-"use client"
+"use client";
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner';
-
-
+import { useRouter } from 'next/navigation'; // Moved useRouter here
 
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -37,7 +34,7 @@ function LoginPage() {
                 setTimeout(() => router.push('/convert'), 500);
             }
 
-        } catch (error) {
+        } catch {
             toast.error("Login failed. Please try again");
         } finally {
             setLoading(false);
@@ -47,7 +44,6 @@ function LoginPage() {
 
     return (
         <div className='flex justify-center items-center min-h-screen p-4 bg-gray-50'>
-            {/* <h1>Login</h1> */}
             <Card className='w-full max-w-md'>
                 <CardHeader>
                     <CardTitle className='text-2xl text-center'>Welcome Back</CardTitle>
@@ -89,22 +85,19 @@ function LoginPage() {
                         >
                             {loading ? 'Logging in...' : 'Login'}
                         </Button>
-
                     </form>
                 </CardContent>
 
                 <CardFooter className='flex justify-center'>
-                    <p className='text-sm text-muted-foreground'>Don't have an account?{' '}
+                    <p className='text-sm text-muted-foreground'>Don&apos;t have an account?{' '}
                         <Link href='/register' className='text-blue-600 hover:underline'>
                             Register
                         </Link>
                     </p>
                 </CardFooter>
-
             </Card>
-
         </div>
     )
 }
 
-export default LoginPage
+export default LoginPage;

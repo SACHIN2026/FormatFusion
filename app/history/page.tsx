@@ -128,7 +128,7 @@ export default function HistoryPage() {
                     </div>
                     <h3 className="text-lg font-medium mb-2">No conversion history</h3>
                     <p className="text-gray-500 mb-4">
-                        You haven't converted any images yet. Your conversion history will appear here.
+                        You haven&apos;t converted any images yet. Your conversion history will appear here.
                     </p>
                     <Link href="/convert">
                         <Button>Convert an Image</Button>
@@ -156,7 +156,7 @@ export default function HistoryPage() {
                                 <div className="text-sm text-gray-500 mt-2">
                                     <p>Converted {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</p>
                                     <p className="mt-1">
-                                        Size: {formatSize(item.beforeSize)} → {formatSize(item.afterSize)}
+                                        Size: {formatSize(item.beforeSize)} &rarr; {formatSize(item.afterSize)}
                                         <span className="text-green-600 ml-2">
                                             ({calculateCompressionRate(item.beforeSize, item.afterSize)} smaller)
                                         </span>

@@ -1,14 +1,26 @@
 "use client"
 
+// Expanded type for result. Add/remove fields as needed for your app.
+interface ResultType {
+    url: string;
+    beforeFormat: string;
+    afterFormat: string;
+    beforeSize: number;
+    afterSize: number;
+    // Add more fields if needed
+}
+
+
 import React, { useState } from 'react'
+import Image from 'next/image';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card } from './ui/card';
 import { Progress } from './ui/progress';
-import { ArrowRight, Upload, Download, RefreshCw } from 'lucide-react';
+import { Upload, Download, RefreshCw } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { totalmem } from 'os';
+
 
 const ConversionForm = () => {
     const { data: session } = useSession();
@@ -17,11 +29,13 @@ const ConversionForm = () => {
     const [quality, setQuality] = useState(80);
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [result, setResult] = useState<any>(null);
+    // TODO: Replace 'ResultType' with the actual type if known
+    const [result, setResult] = useState<ResultType | null>(null);
+    // interface ResultType { url: string; [key: string]: unknown }
     const [preview, setPreview] = useState<string | null>(null);
-    
-    
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; 
+
+
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) {
@@ -34,8 +48,8 @@ const ConversionForm = () => {
             return;
         }
 
-        if(selectedFile.size>MAX_FILE_SIZE){
-            toast.error(`File is too large (${(selectedFile.size/(1024 * 1024)).toFixed(2)}MB). Max size is 10MB allowed.`);
+        if (selectedFile.size > MAX_FILE_SIZE) {
+            toast.error(`File is too large (${(selectedFile.size / (1024 * 1024)).toFixed(2)}MB). Max size is 10MB allowed.`);
             return;
         }
 
@@ -62,8 +76,8 @@ const ConversionForm = () => {
             return;
         }
 
-        if(droppedFile.size>MAX_FILE_SIZE){
-            toast.error(`File is too large (${(droppedFile.size/(1024 * 1024)).toFixed(2)}MB). Max size is 10MB allowed.`);
+        if (droppedFile.size > MAX_FILE_SIZE) {
+            toast.error(`File is too large (${(droppedFile.size / (1024 * 1024)).toFixed(2)}MB). Max size is 10MB allowed.`);
             return;
         }
 
@@ -123,12 +137,12 @@ const ConversionForm = () => {
             // setLoading(false);
             toast.success("Conversion successful");
 
-            if(session){
+            if (session) {
                 await saveToHistory(data);
             }
 
         } catch (error) {
-            // console.error("Conversion error:", error);
+            console.error("Conversion error:", error);
             toast.error("Conversion failed. Please try again.");
         } finally {
             setProgress(100);
@@ -165,7 +179,7 @@ const ConversionForm = () => {
 
 
 
-    const saveToHistory = async (result: any) => {
+    const saveToHistory = async (result: ResultType) => {
         try {
             const res = await fetch("/api/history", {
                 method: 'POST',
@@ -188,6 +202,7 @@ const ConversionForm = () => {
             // const data = await res.json();
             toast.success("Image saved to history");
         } catch (error) {
+            console.log(error)
             toast.error("Failed to save to history");
         }
     }
@@ -221,7 +236,7 @@ const ConversionForm = () => {
                         <div className='space-y-6'>
                             {preview && (
                                 <div className='flex justify-center'>
-                                    <img src={preview} alt="Preview" className='max-h-[300px] rounded-lg shadow-sm' />
+                                    <Image src={preview} alt="Preview" width={400} height={300} className='max-h-[300px] rounded-lg shadow-sm' />
                                 </div>
                             )}
 
@@ -296,9 +311,11 @@ const ConversionForm = () => {
             ) : (
                 <div className='space-y-6'>
                     <div className='flex justify-center'>
-                        <img
+                        <Image
                             src={result.url}
                             alt="Converted"
+                            width={400}
+                            height={300}
                             className='max-h-[300px] rounded-lg shadow-sm'
                         />
                     </div>

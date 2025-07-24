@@ -6,7 +6,7 @@ import { dbconnect } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 // import { authOptions } from "../auth/[...nextauth]/route";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) {
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
         await dbconnect();
 
-        const history = await History.find({userId : session.user.id}).sort({createdAt: -1});
+        const history = await History.find({ userId: session.user.id }).sort({ createdAt: -1 });
 
         return NextResponse.json(history);
 
@@ -35,17 +35,17 @@ export async function GET(req: NextRequest) {
 }
 
 
-export async function POST(req: NextRequest){
+export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
-        if(!session?.user){
+        if (!session?.user) {
             return NextResponse.json(
                 {
                     error: "Unauthorized"
-                },{
+                }, {
                 status: 401
-                }
+            }
             )
         }
 

@@ -21,8 +21,6 @@ function RegisterPage() {
         e.preventDefault();
         setLoading(true);
         try {
-            // react-query
-            // loading, error, debounce
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
@@ -43,9 +41,9 @@ function RegisterPage() {
                 router.push('/login'), 500);
 
 
-        } catch (error: any) {
-            // console.error("Registration failed:", error);
-            toast.error(error.message || "Registration failed. Please try again");
+        } catch (error: unknown) { // Explicitly type error as unknown
+            const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again";
+            toast.error(errorMessage);
             return;
 
         } finally {
@@ -57,7 +55,6 @@ function RegisterPage() {
 
     return (
         <div className='flex justify-center items-center min-h-screen p-4 bg-gray-50'>
-            {/* Registration form or content goes here */}
             <Card className='w-full max-w-md'>
                 <CardHeader>
                     <CardTitle className='text-2xl text-center'>Create an Account</CardTitle>
@@ -122,8 +119,6 @@ function RegisterPage() {
                             </div>
                             <p className='text-sm text-gray-500'> Password must be at least 6 characters</p>
                         </div>
-
-
 
                         <Button
                             type='submit'

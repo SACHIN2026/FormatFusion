@@ -8,11 +8,9 @@ import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react" // Add this import
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import Image from "next/image"
@@ -20,8 +18,8 @@ import Image from "next/image"
 
 export default function NavBar() {
   const pathname = usePathname()
-  const { data: session, status } = useSession() // Get session status
-  
+  const { data: session } = useSession() // Get session only
+
   return (
     <div className="border-b">
       <div className="container flex h-16 items-center px-4 justify-between">
@@ -31,14 +29,14 @@ export default function NavBar() {
             <Image src="/images/logo.png" alt="Logo" width={100} height={40} className="object-contain" />
           </Link>
         </div>
-        
+
         {/* Navigation in middle */}
         <div className="flex-1 flex justify-center">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link href="/"  passHref>
-                  <NavigationMenuLink 
+                <Link href="/" passHref>
+                  <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
                       pathname === "/" && "text-blue-600 bg-blue-50"
@@ -48,10 +46,10 @@ export default function NavBar() {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              
+
               <NavigationMenuItem>
                 <Link href="/convert" legacyBehavior passHref>
-                  <NavigationMenuLink 
+                  <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
                       pathname === "/convert" && "text-blue-600 bg-blue-50"
@@ -61,12 +59,12 @@ export default function NavBar() {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              
+
               {/* Only show history to logged in users */}
               {session && (
                 <NavigationMenuItem>
-                  <Link href="/history"  passHref>
-                    <NavigationMenuLink 
+                  <Link href="/history" passHref>
+                    <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
                         pathname === "/history" && "text-blue-600 bg-blue-50"
@@ -77,10 +75,10 @@ export default function NavBar() {
                   </Link>
                 </NavigationMenuItem>
               )}
-              
+
               <NavigationMenuItem>
-                <Link href="/about"  passHref>
-                  <NavigationMenuLink 
+                <Link href="/about" passHref>
+                  <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
                       pathname === "/about" && "text-blue-600 bg-blue-50"
@@ -105,9 +103,9 @@ export default function NavBar() {
                 {session.user?.name || session.user?.email}
               </span>
               {/* <form action="/api/auth/signout" method="post"> */}
-                <Button variant="outline" size="sm" onClick={()=>{signOut({ redirect: true, callbackUrl: "/"})}}>
-                  Logout
-                </Button>
+              <Button variant="outline" size="sm" onClick={() => { signOut({ redirect: true, callbackUrl: "/" }) }}>
+                Logout
+              </Button>
               {/* </form> */}
             </div>
           ) : (

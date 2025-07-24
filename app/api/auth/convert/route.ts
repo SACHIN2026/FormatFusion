@@ -1,11 +1,9 @@
 import { authOptions } from "@/lib/auth";
 import { dbconnect } from "@/lib/db";
-import { writeFile, mkdir } from "fs/promises";
-import {v2 as cloudinary} from "cloudinary"
+import { v2 as cloudinary } from "cloudinary"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
-import path from "path";
 import Image from "@/models/Image";
 
 
@@ -38,13 +36,13 @@ export async function POST(request: NextRequest) {
     const format = formdata.get("format") as string;
     const quality = parseInt(formdata.get("quality") as string) || 80;
 
-    if(!format || !["jpeg", "png", "jpg", "webp", "avif"].includes(format)){
+    if (!format || !["jpeg", "png", "jpg", "webp", "avif"].includes(format)) {
         return NextResponse.json(
             {
                 error: "Invalid format provided"
             }, {
             status: 400
-            }
+        }
         );
     }
 
@@ -53,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const originalFormat = file.name.split('.').pop()?.toLowerCase()|| 'unknown';
+    const originalFormat = file.name.split('.').pop()?.toLowerCase() || 'unknown';
     const originalSize = buffer.length;
     const fileName = `${Date.now()}-${file.name.split('.')[0]}`;
 
@@ -68,29 +66,29 @@ export async function POST(request: NextRequest) {
         let processedImage;
         switch (format) {
             case "jpeg":
-            case "jpg":    
+            case "jpg":
                 processedImage = await sharp(buffer)
-                .jpeg({quality})
-                .toBuffer();
+                    .jpeg({ quality })
+                    .toBuffer();
                 break;
 
             case "png":
                 processedImage = await sharp(buffer)
-                .png({quality})
-                .toBuffer();
-                break;    
-            
+                    .png({ quality })
+                    .toBuffer();
+                break;
+
             case "webp":
                 processedImage = await sharp(buffer)
-                .webp({quality})
-                .toBuffer();
+                    .webp({ quality })
+                    .toBuffer();
                 break;
             case "avif":
                 processedImage = await sharp(buffer)
-                .avif({quality})
-                .toBuffer();
+                    .avif({ quality })
+                    .toBuffer();
                 break;
-            
+
             default:
                 return NextResponse.json(
                     { error: "Unsupported format" },
@@ -102,25 +100,29 @@ export async function POST(request: NextRequest) {
         // // save processed image
         // const outputPath = path.join(uploadDir, `${fileName}.${format}`);
         // await writeFile(outputPath, processedImage);
-        
+
 
         //Upload to cloudinary
         const b64 = Buffer.from(processedImage).toString("base64");
         const dataUri = `data:image/${format};base64,${b64}`;
 
-        const cloudinaryResponse = await new Promise((resolve, reject)=>{
+        interface CloudinaryUploadResult {
+            secure_url: string;
+            [key: string]: unknown;
+        }
+        const cloudinaryResponse = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
             cloudinary.uploader.upload(dataUri, {
                 folder: "image-converter",
                 public_id: fileName,
                 format: format,
             },
-            (error, result) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(result);
+                (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result as CloudinaryUploadResult);
+                    }
                 }
-            }
             )
         })
 
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
 
         await dbconnect();
         const newImage = await Image.create({
-            url: (cloudinaryResponse as any).secure_url,
+            url: cloudinaryResponse.secure_url,
             userId: session.user.id,
             beforeFormat: originalFormat,
             afterFormat: format,
@@ -141,25 +143,25 @@ export async function POST(request: NextRequest) {
         //img details
         return NextResponse.json({
             message: "Image uploaded successfully",
-            id : newImage._id.toString(),
+            id: newImage._id.toString(),
             url: newImage.url,
             beforeFormat: newImage.beforeFormat,
             afterFormat: newImage.afterFormat,
             beforeSize: newImage.beforeSize,
             afterSize: newImage.afterSize,
             quality: newImage.quality,
-            compressionRate : Math.round((1 - (newImage.afterSize / newImage.beforeSize)) * 100),
-        },{
+            compressionRate: Math.round((1 - (newImage.afterSize / newImage.beforeSize)) * 100),
+        }, {
             status: 200
         })
-        
+
     } catch (error) {
         console.error("Error processing image:", error);
         return NextResponse.json(
             { error: "Error processing image" },
             { status: 500 }
-        );  
-        
+        );
+
     }
 
 
