@@ -15,7 +15,7 @@ export default function Home() {
           Transform your images between formats with our powerful, free online converter. No software to install.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/convert">
+          <Link href="/login">
             <Button size="lg" className="px-8 w-full sm:w-auto">
               Start Converting <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -86,9 +86,9 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Convert Your Images?</h2>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Our free tool is waiting for you. No registration required.
+          Our free tool is waiting for you. Register Now.
         </p>
-        <Link href="/convert">
+        <Link href="/register">
           <Button size="lg" className="px-8">
             Start Now <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
