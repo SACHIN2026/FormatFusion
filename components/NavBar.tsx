@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { useSession } from "next-auth/react" // Add this import
+import { useSession } from "next-auth/react"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -47,18 +47,20 @@ export default function NavBar() {
                 </Link>
               </NavigationMenuItem>
 
-              <NavigationMenuItem>
-                <Link href="/convert" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      pathname === "/convert" && "text-blue-600 bg-blue-50"
-                    )}
-                  >
-                    Convert
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
+              {session && (
+                <NavigationMenuItem>
+                  <Link href="/convert" legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        pathname === "/convert" && "text-blue-600 bg-blue-50"
+                      )}
+                    >
+                      Convert
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              )}
 
               {/* Only show history to logged in users */}
               {session && (
