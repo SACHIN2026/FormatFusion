@@ -35,7 +35,7 @@ export default function NavBar() {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link href="/" passHref>
+                <Link href="/" legacyBehavior passHref>
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
@@ -62,10 +62,25 @@ export default function NavBar() {
                 </NavigationMenuItem>
               )}
 
+              {session && (
+                <NavigationMenuItem>
+                  <Link href="/removebackground" legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        pathname === "/removebackground" && "text-blue-600 bg-blue-50"
+                      )}
+                    >
+                      Remove BG
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              )}
+
               {/* Only show history to logged in users */}
               {session && (
                 <NavigationMenuItem>
-                  <Link href="/history" passHref>
+                  <Link href="/history" legacyBehavior passHref>
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
@@ -79,7 +94,7 @@ export default function NavBar() {
               )}
 
               <NavigationMenuItem>
-                <Link href="/about" passHref>
+                <Link href="/about" legacyBehavior passHref>
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
@@ -104,20 +119,18 @@ export default function NavBar() {
               <span className="text-sm hidden md:inline">
                 {session.user?.name || session.user?.email}
               </span>
-              {/* <form action="/api/auth/signout" method="post"> */}
               <Button variant="outline" size="sm" onClick={() => { signOut({ redirect: true, callbackUrl: "/" }) }}>
                 Logout
               </Button>
-              {/* </form> */}
             </div>
           ) : (
             <>
-              <Link href="/login">
-                <Button variant="outline" size="sm">Login</Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm">Sign up</Button>
-              </Link>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/register">Sign up</Link>
+              </Button>
             </>
           )}
         </div>
