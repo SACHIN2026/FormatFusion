@@ -5,8 +5,42 @@ import { useSession } from 'next-auth/react';
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => {
+      open(): void;
+    };
   }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  handler: (response: RazorpayResponse) => void;
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface OrderData {
+  id: string;
+  amount: number;
+  currency: string;
 }
 
 interface PricingPlan {
@@ -117,9 +151,9 @@ export default function PricingPage() {
     }
   };
 
-  const openRazorpayCheckout = (orderData: any, planId: string) => {
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+  const openRazorpayCheckout = (orderData: OrderData, planId: string) => {
+    const options: RazorpayOptions = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
       amount: orderData.amount,
       currency: orderData.currency,
       name: 'FormatFusion',
@@ -132,7 +166,7 @@ export default function PricingPage() {
       theme: {
         color: '#3B82F6'
       },
-      handler: async function (response: any) {        
+      handler: async function (response: RazorpayResponse) {        
         try {
           const verifyResponse = await fetch('/api/razorpay/verify-payment', {
             method: 'POST',
@@ -235,7 +269,7 @@ export default function PricingPage() {
               </div>
               <div className="px-6 pt-6 pb-8 bg-gray-50 rounded-b-lg">
                 <h4 className="text-sm font-medium text-gray-900 tracking-wide uppercase">
-                  What's included
+                  What&apos;s included
                 </h4>
                 <ul className="mt-6 space-y-4">
                   {plan.features.map((feature, index) => (

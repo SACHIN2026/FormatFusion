@@ -5,8 +5,42 @@ import { useSession } from 'next-auth/react';
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => {
+      open(): void;
+    };
   }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  handler: (response: RazorpayResponse) => void;
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface OrderData {
+  id: string;
+  amount: number;
+  currency: string;
 }
 
 interface PricingPlan {
@@ -84,7 +118,7 @@ export default function PricingPlans() {
         throw new Error('Failed to create order');
       }
 
-      const orderData = await orderResponse.json();
+      const orderData: OrderData = await orderResponse.json();
 
       // Step 2: Load Razorpay checkout
       const script = document.createElement('script');
@@ -94,14 +128,14 @@ export default function PricingPlans() {
 
       script.onload = () => {
         // Step 3: Initialize Razorpay checkout
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        const options: RazorpayOptions = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
           amount: orderData.amount,
           currency: orderData.currency,
           name: 'FormatFusion',
           description: `${planId.charAt(0).toUpperCase() + planId.slice(1)} Plan Subscription`,
           order_id: orderData.id,
-          handler: async (response: any) => {
+          handler: async (response: RazorpayResponse) => {
             try {
               // Step 4: Verify payment on server
               const verifyResponse = await fetch('/api/razorpay/verify-payment', {
@@ -220,7 +254,7 @@ export default function PricingPlans() {
               
               <div className="pt-6 pb-8 px-6">
                 <h4 className="text-sm font-medium text-gray-900 tracking-wide uppercase">
-                  What's included
+                  What&apos;s included
                 </h4>
                 <ul className="mt-6 space-y-4">
                   {plan.features.map((feature, index) => (
