@@ -1,0 +1,8 @@
+{
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/razorpay/create-order/route": "app/api/razorpay/create-order/route.js",
+  "/subscription/success/page": "app/subscription/success/page.js",
+  "/pricing/page": "app/pricing/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/convert/page": "app/convert/page.js"
+}
