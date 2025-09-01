@@ -4,8 +4,11 @@ import bcrypt from "bcryptjs";
 
 
 export interface IUser {
+    name?: string;
     email: string;
-    password: string;
+    password?: string; // Optional for OAuth users
+    provider?: 'credentials' | 'google' | 'github';
+    providerId?: string; // OAuth provider user ID
     subscriptionStatus?: 'free' | 'active' | 'expired' | 'cancelled';
     subscriptionPlan?: 'free' | 'basic' | 'premium';
     subscriptionCurrentPeriodEnd?: Date;
@@ -18,8 +21,15 @@ export interface IUser {
 
 const userSchema = new Schema<IUser>(
     {
+        name: { type: String, required: false },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        password: { type: String, required: false }, // Optional for OAuth
+        provider: { 
+            type: String, 
+            enum: ['credentials', 'google', 'github'],
+            default: 'credentials'
+        },
+        providerId: { type: String, required: false },
         subscriptionStatus: {
             type: String,
             enum: ['free', 'active', 'expired', 'cancelled'],
@@ -40,7 +50,7 @@ const userSchema = new Schema<IUser>(
 )
 
 userSchema.pre("save", async function (next) {
-    if(this.isModified("password")){
+    if(this.isModified("password") && this.password){
         (this as any).password = await bcrypt.hash((this as any).password, 10);
     }
     next();

@@ -7,7 +7,8 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation'; // Moved useRouter here
+import { useRouter } from 'next/navigation';
+import { OAuthSection } from '@/components/ui/OAuthSection';
 
 function LoginPage() {
     const [email, setEmail] = useState('');
@@ -52,7 +53,9 @@ function LoginPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className='space-y-4'>
+                    <OAuthSection loading={loading} />
+                    
+                    <form onSubmit={handleSubmit} className='space-y-4 mt-6'>
                         <div className='space-y-2'>
                             <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
                                 Email

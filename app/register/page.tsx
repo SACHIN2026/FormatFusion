@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
+import { OAuthSection } from '@/components/ui/OAuthSection';
 
 function RegisterPage() {
     const [name, setName] = useState('');
@@ -63,7 +64,9 @@ function RegisterPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className='space-y-4'>
+                    <OAuthSection loading={loading} />
+                    
+                    <form onSubmit={handleSubmit} className='space-y-4 mt-6'>
                         <div className='space-y-2'>
                             <label htmlFor='name' className='block text-sm font-medium text-gray-700'>
                                 Name
