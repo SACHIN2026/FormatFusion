@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { planId, amount } = body;
+    const { planId } = body;
 
     if (!planId) {
       return NextResponse.json({ error: 'Missing planId' }, { status: 400 });
