@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import Image from "@/models/Image";
+import User from "@/models/User";
+import mongoose from "mongoose";
 
 
 cloudinary.config({
@@ -129,9 +131,33 @@ export async function POST(request: NextRequest) {
         //save to db
 
         await dbconnect();
+        
+        // Validate and convert session user ID to ObjectId
+        if (!session.user.id) {
+            return NextResponse.json(
+                { error: "Invalid user session" },
+                { status: 401 }
+            );
+        }
+        
+        let userObjectId: mongoose.Types.ObjectId;
+        try {
+            userObjectId = new mongoose.Types.ObjectId(session.user.id);
+        } catch {
+            // If session.user.id is not a valid ObjectId, find user by email
+            const dbUser = await User.findOne({ email: session.user.email });
+            if (!dbUser) {
+                return NextResponse.json(
+                    { error: "User not found in database" },
+                    { status: 404 }
+                );
+            }
+            userObjectId = dbUser._id;
+        }
+        
         const newImage = await Image.create({
             url: cloudinaryResponse.secure_url,
-            userId: session.user.id,
+            userId: userObjectId,
             beforeFormat: originalFormat,
             afterFormat: format,
             name: file.name,

@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import mongoose from "mongoose";
 import History from "@/models/History";
+import User from "@/models/User";
 import { dbconnect } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 // import { authOptions } from "../auth/[...nextauth]/route";
@@ -19,7 +20,23 @@ export async function GET() {
 
         await dbconnect();
 
-        const history = await History.find({ userId: session.user.id }).sort({ createdAt: -1 });
+        // Validate and convert session user ID to ObjectId
+        let userObjectId: mongoose.Types.ObjectId;
+        try {
+            userObjectId = new mongoose.Types.ObjectId(session.user.id);
+        } catch {
+            // If session.user.id is not a valid ObjectId, find user by email
+            const dbUser = await User.findOne({ email: session.user.email });
+            if (!dbUser) {
+                return NextResponse.json(
+                    { error: "User not found in database" },
+                    { status: 404 }
+                );
+            }
+            userObjectId = dbUser._id;
+        }
+
+        const history = await History.find({ userId: userObjectId }).sort({ createdAt: -1 });
 
         return NextResponse.json(history);
 
@@ -53,9 +70,25 @@ export async function POST(req: NextRequest) {
 
         await dbconnect();
 
+        // Validate and convert session user ID to ObjectId
+        let userObjectId: mongoose.Types.ObjectId;
+        try {
+            userObjectId = new mongoose.Types.ObjectId(session.user.id);
+        } catch {
+            // If session.user.id is not a valid ObjectId, find user by email
+            const dbUser = await User.findOne({ email: session.user.email });
+            if (!dbUser) {
+                return NextResponse.json(
+                    { error: "User not found in database" },
+                    { status: 404 }
+                );
+            }
+            userObjectId = dbUser._id;
+        }
+
         const historyRecord = await History.create({
             url: data.url,
-            userId: new mongoose.Types.ObjectId(session.user.id),
+            userId: userObjectId,
             beforeFormat: data.beforeFormat,
             afterFormat: data.afterFormat,
             name: data.name,

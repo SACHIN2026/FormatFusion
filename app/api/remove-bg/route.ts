@@ -5,6 +5,8 @@ import { v2 as cloudinary } from "cloudinary"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import Image from "@/models/Image";
+import User from "@/models/User";
+import mongoose from "mongoose";
 
 
 cloudinary.config({
@@ -80,10 +82,27 @@ export async function POST(request: NextRequest) {
 
         // Save to database
         await dbconnect();
+        
+        // Validate and convert session user ID to ObjectId
+        let userObjectId: mongoose.Types.ObjectId;
+        try {
+            userObjectId = new mongoose.Types.ObjectId(session.user.id);
+        } catch {
+            // If session.user.id is not a valid ObjectId, find user by email
+            const dbUser = await User.findOne({ email: session.user.email });
+            if (!dbUser) {
+                return NextResponse.json(
+                    { error: "User not found in database" },
+                    { status: 404 }
+                );
+            }
+            userObjectId = dbUser._id;
+        }
+        
         const image = await Image.create({
             name: fileName,
             url: upload.secure_url,
-            userId: session.user.id,
+            userId: userObjectId,
             beforeFormat: file.name.split(".").pop()?.toLowerCase() || "unknown",
             afterFormat: "png",
             beforeSize: buffer.length,
