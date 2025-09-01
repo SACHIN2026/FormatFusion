@@ -95,7 +95,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-semibold mb-3">Contact Us</h2>
           <p className="text-gray-700">
             Have questions or suggestions? We&apos;d love to hear from you at{" "}
-            <a href="mailto:contact@imageconverter.com" className="text-blue-600 underline">
+            <a href="mailto:support@formatfusion.dev" className="text-blue-600 underline">
               contact@imageconverter.com
             </a>.
           </p>

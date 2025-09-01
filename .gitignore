@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-node_modules
-=======
-.next/
-
 # Dependencies
 /node_modules
 /.pnp
@@ -20,7 +15,7 @@ package-lock.json
 # Production
 /build
 
-# Environment Variables
+# Environment Variables - DO NOT COMMIT
 .env
 .env.local
 .env.development.local
@@ -53,6 +48,21 @@ next-env.d.ts
 # IDE
 .idea/
 .vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.backup
+*.old
+README.old.md
 *.sublime-project
 *.sublime-workspace
 .project
@@ -90,4 +100,3 @@ logs
 # Build cache
 .eslintcache
 .stylelintcache
->>>>>>> 8aab49620e8c289a0668264e1a5a5356f6998397
