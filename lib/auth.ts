@@ -84,8 +84,24 @@ export const authOptions: NextAuthOptions = {
         },
         async jwt({token, user}){
             if(user){
+                // For initial sign in, store the ID
                 token.id = user.id;
+                token.email = user.email;
             }
+            
+            // If we don't have a proper database ID, fetch it
+            if (token.email && (!token.id || typeof token.id === 'string')) {
+                try {
+                    await dbconnect();
+                    const dbUser = await User.findOne({ email: token.email });
+                    if (dbUser) {
+                        token.id = dbUser._id.toString();
+                    }
+                } catch (error) {
+                    console.error('Error fetching user ID in JWT callback:', error);
+                }
+            }
+            
             return token;
         },
         async session({session, token}){
