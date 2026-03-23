@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:protected": "npm run env:protected:check && npm run dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "env:protected:check": "node scripts/protected-env-check.mjs",
+    "smtp:verify": "node scripts/smtp-verify.mjs",
+    "theme:audit": "node scripts/playwright-theme-audit.mjs"
   },
   "dependencies": {
     "@radix-ui/react-navigation-menu": "^1.2.13",
@@ -16,6 +20,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
     "@types/bcryptjs": "^2.4.6",
+    "@types/nodemailer": "^7.0.11",
     "@types/sharp": "^0.31.1",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
@@ -26,9 +31,10 @@
     "date-fns": "^4.1.0",
     "lucide-react": "^0.524.0",
     "mongoose": "^8.16.3",
-    "next": "15.3.4",
+    "next": "16.2.1",
     "next-auth": "^4.24.11",
     "next-themes": "^0.4.6",
+    "nodemailer": "^7.0.13",
     "razorpay": "^2.9.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -46,7 +52,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.4",
+    "eslint-config-next": "16.2.1",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
