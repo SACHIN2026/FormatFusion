@@ -44,7 +44,7 @@ function LoginPage() {
     }
 
     return (
-        <div className='flex justify-center items-center min-h-screen p-4 bg-gray-50'>
+        <div className='flex justify-center items-center min-h-screen p-4 bg-background'>
             <Card className='w-full max-w-md'>
                 <CardHeader>
                     <CardTitle className='text-2xl text-center'>Welcome Back</CardTitle>
@@ -93,7 +93,7 @@ function LoginPage() {
                     
                     <form onSubmit={handleSubmit} className='space-y-4 mt-6'>
                         <div className='space-y-2'>
-                            <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='email' className='block text-sm font-medium text-foreground'>
                                 Email
                             </label>
                             <Input
@@ -106,7 +106,7 @@ function LoginPage() {
                             />
                         </div>
                         <div className='space-y-2'>
-                            <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='password' className='block text-sm font-medium text-foreground'>
                                 Password
                             </label>
                             <Input
@@ -117,6 +117,11 @@ function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
+                            <div className='text-right'>
+                                <Link href='/forgot-password' className='text-sm text-primary hover:underline'>
+                                    Forgot password?
+                                </Link>
+                            </div>
                         </div>
                         <Button type='submit'
                             disabled={!email || !password || loading}
@@ -129,7 +134,7 @@ function LoginPage() {
 
                 <CardFooter className='flex justify-center'>
                     <p className='text-sm text-muted-foreground'>Don&apos;t have an account?{' '}
-                        <Link href='/register' className='text-blue-600 hover:underline'>
+                        <Link href='/register' className='text-primary hover:underline'>
                             Register
                         </Link>
                     </p>

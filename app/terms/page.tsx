@@ -64,7 +64,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">8. Contact</h2>
           <p className="text-gray-700">
-            If you have any questions about these Terms, please contact us at terms@imageconverter.com.
+            If you have any questions about these Terms, please contact us at support@formatfusion.dev.
           </p>
         </section>
         

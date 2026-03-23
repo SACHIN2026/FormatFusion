@@ -9,6 +9,9 @@ interface Subscription {
   status: 'free' | 'active' | 'cancelled' | 'expired';
   plan: 'free' | 'basic' | 'premium';
   currentPeriodEnd?: string;
+  createdAt?: string;
+  conversionCount?: number;
+  conversionLimit?: number | null;
 }
 
 export default function Dashboard() {
@@ -26,30 +29,12 @@ export default function Dashboard() {
       const response = await fetch(`/api/subscription/status?t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Manual refresh subscription data:', JSON.stringify(data, null, 2));
         setSubscription(data.subscription || { status: 'free', plan: 'free' });
-      } else {
-        console.error('Failed to fetch subscription:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error refreshing subscription:', error);
     } finally {
       setRefreshing(false);
-    }
-  };
-
-  const debugUser = async () => {
-    try {
-      const response = await fetch('/api/debug/user');
-      if (response.ok) {
-        const data = await response.json();
-        console.log('DEBUG - Complete user data:', JSON.stringify(data, null, 2));
-        alert('Check console for complete user data');
-      } else {
-        console.error('Failed to fetch debug data:', response.status);
-      }
-    } catch (error) {
-      console.error('Error fetching debug data:', error);
     }
   };
 
@@ -68,11 +53,9 @@ export default function Dashboard() {
       }
 
       try {
-        // Add timestamp to force fresh data
         const response = await fetch(`/api/subscription/status?t=${Date.now()}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('Dashboard subscription data:', data);
           setSubscription(data.subscription || { status: 'free', plan: 'free' });
         }
       } catch (error) {
@@ -95,7 +78,6 @@ export default function Dashboard() {
             const response = await fetch(`/api/subscription/status?t=${Date.now()}`);
             if (response.ok) {
               const data = await response.json();
-              console.log('Refreshed subscription data:', data);
               setSubscription(data.subscription || { status: 'free', plan: 'free' });
             }
           } catch (error) {
@@ -112,7 +94,7 @@ export default function Dashboard() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -123,12 +105,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="mt-2 text-muted-foreground">
             Welcome back, {session.user?.name || session.user?.email}!
           </p>
         </div>
@@ -136,25 +118,19 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Subscription Status Card */}
           <div className="lg:col-span-2">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-card border border-border overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-foreground">
                     Subscription Status
                   </h3>
                   <div className="flex gap-2">
                     <button
                       onClick={refreshSubscription}
                       disabled={refreshing}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-3 py-1 border border-input rounded-md text-xs font-medium text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                       {refreshing ? 'Refreshing...' : 'Refresh'}
-                    </button>
-                    <button
-                      onClick={debugUser}
-                      className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                      Debug
                     </button>
                   </div>
                 </div>
@@ -165,20 +141,20 @@ export default function Dashboard() {
                         subscription.status === 'active'
                           ? 'bg-green-100 text-green-800'
                           : subscription.status === 'expired'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {subscription.status.charAt(0).toUpperCase() + 
                        subscription.status.slice(1)}
                     </span>
-                    <span className="ml-2 text-sm text-gray-900 capitalize">
+                    <span className="ml-2 text-sm text-foreground capitalize">
                       {subscription.plan} Plan
                     </span>
                   </div>
                   
                   {subscription.currentPeriodEnd && (
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       {subscription.status === 'active' ? 'Renews' : 'Expired'} on{' '}
                       {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-IN')}
                     </p>
@@ -201,33 +177,33 @@ export default function Dashboard() {
 
           {/* Quick Actions Card */}
           <div>
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-card border border-border overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                <h3 className="text-lg leading-6 font-medium text-foreground">
                   Quick Actions
                 </h3>
                 <div className="mt-4 space-y-3">
                   <Link
                     href="/convert"
-                    className="block w-full text-left px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="block w-full text-left px-3 py-2 border border-input rounded-md text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     🔄 Convert Files
                   </Link>
                   <Link
                     href="/removebackground"
-                    className="block w-full text-left px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="block w-full text-left px-3 py-2 border border-input rounded-md text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     🖼️ Remove Background
                   </Link>
                   <Link
                     href="/history"
-                    className="block w-full text-left px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="block w-full text-left px-3 py-2 border border-input rounded-md text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     📋 View History
                   </Link>
                   <Link
                     href="/pricing"
-                    className="block w-full text-left px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="block w-full text-left px-3 py-2 border border-input rounded-md text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     💰 View Pricing
                   </Link>
@@ -239,9 +215,9 @@ export default function Dashboard() {
 
         {/* Plan Features */}
         <div className="mt-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="bg-card border border-border overflow-hidden shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+              <h3 className="text-lg leading-6 font-medium text-foreground">
                 Your Plan Features
               </h3>
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -259,7 +235,7 @@ export default function Dashboard() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="ml-2 text-sm text-gray-900">
+                  <span className="ml-2 text-sm text-foreground">
                     {subscription.status === 'active' ? 'Unlimited' : '5'} Conversions
                   </span>
                 </div>
@@ -278,7 +254,7 @@ export default function Dashboard() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="ml-2 text-sm text-gray-900">
+                  <span className="ml-2 text-sm text-foreground">
                     All File Formats
                   </span>
                 </div>
@@ -297,7 +273,7 @@ export default function Dashboard() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="ml-2 text-sm text-gray-900">
+                  <span className="ml-2 text-sm text-foreground">
                     Batch Processing
                   </span>
                 </div>
@@ -316,7 +292,7 @@ export default function Dashboard() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="ml-2 text-sm text-gray-900">
+                  <span className="ml-2 text-sm text-foreground">
                     API Access
                   </span>
                 </div>
@@ -325,37 +301,85 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Usage Statistics Card */}
+        {/* Usage Statistics */}
         <div className="mt-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="bg-card border border-border overflow-hidden shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Account Information
-              </h3>
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <h3 className="text-lg leading-6 font-medium text-foreground">Usage This Month</h3>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="bg-secondary rounded-lg p-4">
+                  <p className="text-sm text-primary font-medium">Conversions Used</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">
+                    {subscription.conversionCount ?? 0}
+                    {subscription.conversionLimit !== null && (
+                      <span className="text-sm font-normal text-muted-foreground"> / {subscription.conversionLimit}</span>
+                    )}
+                    {subscription.conversionLimit === null && (
+                      <span className="text-sm font-normal text-muted-foreground"> / ∞</span>
+                    )}
+                  </p>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                  <p className="text-sm text-green-600 dark:text-green-300 font-medium">Plan</p>
+                  <p className="text-3xl font-bold text-green-700 dark:text-green-200 mt-1 capitalize">{subscription.plan}</p>
+                </div>
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                  <p className="text-sm text-purple-600 dark:text-purple-300 font-medium">Status</p>
+                  <p className="text-3xl font-bold text-purple-700 dark:text-purple-200 mt-1 capitalize">{subscription.status}</p>
+                </div>
+              </div>
+              {subscription.conversionLimit !== null && (
+                <div className="mt-4">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Monthly limit</span>
+                    <span>{subscription.conversionCount ?? 0} / {subscription.conversionLimit}</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${
+                        (subscription.conversionCount ?? 0) >= (subscription.conversionLimit ?? 5)
+                          ? 'bg-red-500' : 'bg-blue-500'
+                      }`}
+                      style={{ width: `${Math.min(100, ((subscription.conversionCount ?? 0) / (subscription.conversionLimit ?? 5)) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Account Information */}
+        <div className="mt-8">
+          <div className="bg-card border border-border overflow-hidden shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg leading-6 font-medium text-foreground">Account Information</h3>
+              <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{session.user?.email}</dd>
+                  <dt className="text-sm font-medium text-muted-foreground">Email</dt>
+                  <dd className="mt-1 text-sm text-foreground">{session.user?.email}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Current Plan</dt>
-                  <dd className="mt-1 text-sm text-gray-900 capitalize">
+                  <dt className="text-sm font-medium text-muted-foreground">Current Plan</dt>
+                  <dd className="mt-1 text-sm text-foreground capitalize">
                     {subscription.plan} Plan
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1 text-sm text-gray-900 capitalize">
+                  <dt className="text-sm font-medium text-muted-foreground">Status</dt>
+                  <dd className="mt-1 text-sm text-foreground capitalize">
                     {subscription.status}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Member Since</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {new Date().toLocaleDateString('en-IN')}
+                  <dt className="text-sm font-medium text-muted-foreground">Member Since</dt>
+                  <dd className="mt-1 text-sm text-foreground">
+                    {subscription.createdAt
+                      ? new Date(subscription.createdAt).toLocaleDateString('en-IN')
+                      : 'N/A'}
                   </dd>
                 </div>
-              </div>
+              </dl>
             </div>
           </div>
         </div>

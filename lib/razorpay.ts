@@ -48,7 +48,6 @@ export const verifyPaymentSignature = (
   razorpaySignature: string
 ): boolean => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const crypto = require('crypto');
     
     const body = razorpayOrderId + '|' + razorpayPaymentId;

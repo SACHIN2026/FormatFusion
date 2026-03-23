@@ -14,6 +14,12 @@ export interface IUser {
     subscriptionCurrentPeriodEnd?: Date;
     subscriptionId?: string;
     stripeCustomerId?: string;
+    expiryReminderSent?: boolean;
+    resetPasswordToken?: string;
+    resetPasswordExpires?: Date;
+    apiKeyHash?: string;
+    apiKeyPrefix?: string;
+    apiKeyCreatedAt?: Date;
     _id?: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
@@ -43,6 +49,12 @@ const userSchema = new Schema<IUser>(
         subscriptionCurrentPeriodEnd: { type: Date },
         subscriptionId: { type: String },
         stripeCustomerId: { type: String },
+        expiryReminderSent: { type: Boolean, default: false },
+        resetPasswordToken: { type: String },
+        resetPasswordExpires: { type: Date },
+        apiKeyHash: { type: String },
+        apiKeyPrefix: { type: String },
+        apiKeyCreatedAt: { type: Date },
     },
     {
         timestamps: true
@@ -51,7 +63,7 @@ const userSchema = new Schema<IUser>(
 
 userSchema.pre("save", async function (next) {
     if(this.isModified("password") && this.password){
-        (this as any).password = await bcrypt.hash((this as any).password, 10);
+        this.password = await bcrypt.hash(this.password, 10);
     }
     next();
 });

@@ -8,7 +8,7 @@ export default function Convert() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-center">FormatFusion</h1>
         <p className="text-center mb-8 text-gray-600">
-          Convert your images between JPEG, PNG, WebP, and AVIF formats with custom quality settings
+          Convert images from upload or URL, with custom quality and optional resize/crop settings
         </p>
         <Providers>
           <ConversionForm />
