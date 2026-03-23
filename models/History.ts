@@ -13,6 +13,7 @@ export interface IHistory {
     beforeSize: number;
     afterSize: number;
     status?: string;
+    removedBg?: boolean;
 }
 
 const historySchema = new Schema<IHistory>(
@@ -25,7 +26,7 @@ const historySchema = new Schema<IHistory>(
         beforeSize: {type: Number, required: true},
         afterSize: {type: Number, required: true},
         status: {type: String, enum: ['completed', 'failed', 'processing'], default: 'completed'},
-
+        removedBg: {type: Boolean, default: false},
     },{
         timestamps: true
     }

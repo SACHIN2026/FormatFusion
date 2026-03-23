@@ -56,7 +56,7 @@ function RegisterPage() {
 
 
     return (
-        <div className='flex justify-center items-center min-h-screen p-4 bg-gray-50'>
+        <div className='flex justify-center items-center min-h-screen p-4 bg-background'>
             <Card className='w-full max-w-md'>
                 <CardHeader>
                     <CardTitle className='text-2xl text-center'>Create an Account</CardTitle>
@@ -105,7 +105,7 @@ function RegisterPage() {
                     
                     <form onSubmit={handleSubmit} className='space-y-4 mt-6'>
                         <div className='space-y-2'>
-                            <label htmlFor='name' className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='name' className='block text-sm font-medium text-foreground'>
                                 Name
                             </label>
                             <Input
@@ -118,7 +118,7 @@ function RegisterPage() {
                             />
                         </div>
                         <div className='space-y-2'>
-                            <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='email' className='block text-sm font-medium text-foreground'>
                                 Email
                             </label>
                             <div className='relative'>
@@ -134,7 +134,7 @@ function RegisterPage() {
                             </div>
                         </div>
                         <div className='space-y-2'>
-                            <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='password' className='block text-sm font-medium text-foreground'>
                                 Password
                             </label>
                             <div className='relative'>
@@ -151,13 +151,13 @@ function RegisterPage() {
 
                                 <button
                                     type='button'
-                                    className='absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700'
+                                    className='absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground'
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
-                            <p className='text-sm text-gray-500'> Password must be at least 6 characters</p>
+                            <p className='text-sm text-muted-foreground'> Password must be at least 6 characters</p>
                         </div>
 
                         <Button
@@ -172,7 +172,7 @@ function RegisterPage() {
 
                 <CardFooter className='flex justify-center'>
                     <p className='text-sm text-muted-foreground'>Already have an account?{' '}
-                        <Link href='/login' className='text-blue-600 hover:underline'>
+                        <Link href='/login' className='text-primary hover:underline'>
                             Login
                         </Link>
                     </p>

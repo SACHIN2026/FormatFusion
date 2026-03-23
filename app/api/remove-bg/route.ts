@@ -4,9 +4,10 @@ import { dbconnect } from "@/lib/db";
 import { v2 as cloudinary } from "cloudinary"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import Image from "@/models/Image";
+import History from "@/models/History";
 import User from "@/models/User";
 import mongoose from "mongoose";
+import { extractApiKeyFromHeaders, getUserByApiKey } from "@/lib/api-key";
 
 
 cloudinary.config({
@@ -15,12 +16,6 @@ cloudinary.config({
 
 export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-        return NextResponse.json(
-            { error: "Unauthorized" },
-            { status: 401 }
-        );
-    }
 
 
     // image file upload
@@ -49,16 +44,65 @@ export async function POST(request: NextRequest) {
 
     const base64Image = buffer.toString('base64');
 
-
     // remove bg
-
     try {
+        await dbconnect();
+
+        // Resolve authenticated user from session or API key
+        let userObjectId: mongoose.Types.ObjectId;
+        if (session?.user) {
+            try {
+                userObjectId = new mongoose.Types.ObjectId(session.user.id);
+            } catch {
+                const dbUser = await User.findOne({ email: session.user.email });
+                if (!dbUser) {
+                    return NextResponse.json({ error: "User not found" }, { status: 404 });
+                }
+                userObjectId = dbUser._id;
+            }
+        } else {
+            const apiKey = extractApiKeyFromHeaders(request.headers);
+            if (!apiKey) {
+                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
+
+            const apiUser = await getUserByApiKey(apiKey);
+            if (!apiUser) {
+                return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
+            }
+
+            userObjectId = apiUser._id;
+        }
+
+        // Enforce subscription expiry
+        const user = await User.findById(userObjectId);
+        const isActive = user?.subscriptionStatus === 'active' &&
+            user?.subscriptionCurrentPeriodEnd &&
+            new Date(user.subscriptionCurrentPeriodEnd) > new Date();
+        if (user?.subscriptionStatus === 'active' && !isActive) {
+            await User.updateOne({ _id: userObjectId }, { $set: { subscriptionStatus: 'expired' } });
+        }
+        const effectivePlan = isActive ? user?.subscriptionPlan : 'free';
+
+        // Enforce free plan limit (5 per month)
+        if (effectivePlan === 'free') {
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+            const count = await History.countDocuments({ userId: userObjectId, createdAt: { $gte: startOfMonth } });
+            if (count >= 5) {
+                return NextResponse.json(
+                    { error: "Free plan limit reached (5/month). Please upgrade to continue.", limitReached: true },
+                    { status: 403 }
+                );
+            }
+        }
+
         const result = await removeBackgroundFromImageBase64({
             base64img: base64Image,
             apiKey: process.env.REMOVE_BG_API_KEY!,
-            size: "regular",
+            size: "full",
             type: "auto",
-            scale: "50%"
         })
 
         const b64 = Buffer.from(result.base64img, 'base64').toString('base64');
@@ -81,33 +125,15 @@ export async function POST(request: NextRequest) {
         });
 
         // Save to database
-        await dbconnect();
-        
-        // Validate and convert session user ID to ObjectId
-        let userObjectId: mongoose.Types.ObjectId;
-        try {
-            userObjectId = new mongoose.Types.ObjectId(session.user.id);
-        } catch {
-            // If session.user.id is not a valid ObjectId, find user by email
-            const dbUser = await User.findOne({ email: session.user.email });
-            if (!dbUser) {
-                return NextResponse.json(
-                    { error: "User not found in database" },
-                    { status: 404 }
-                );
-            }
-            userObjectId = dbUser._id;
-        }
-        
-        const image = await Image.create({
-            name: fileName,
+        const image = await History.create({
+            name: file.name,
             url: upload.secure_url,
             userId: userObjectId,
             beforeFormat: file.name.split(".").pop()?.toLowerCase() || "unknown",
             afterFormat: "png",
             beforeSize: buffer.length,
             afterSize: Buffer.from(result.base64img, "base64").length,
-            quality: 100,
+            status: 'completed',
             removedBg: true,
         })
 

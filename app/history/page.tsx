@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Download, Trash2, Clock, FileType, ArrowRight, Lock } from "lucide-react"
+import { Download, Trash2, Clock, FileType, ArrowRight, Lock, Image as ImageIcon, Share2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { toast } from "sonner"
 import { useSession } from "next-auth/react"
@@ -18,18 +18,25 @@ type HistoryItem = {
     afterSize: number;
     status: string;
     createdAt: string;
+    removedBg?: boolean;
 };
+
+type SortOption = 'newest' | 'oldest' | 'largest' | 'smallest';
+type TypeFilter = 'all' | 'conversion' | 'removebg';
 
 export default function HistoryPage() {
     const [history, setHistory] = useState<HistoryItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const { data: session } = useSession()
 
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+    const [formatFilter, setFormatFilter] = useState<string>('all');
+    const [sortBy, setSortBy] = useState<SortOption>('newest');
+
     useEffect(() => {
         const fetchHistory = async () => {
             try {
                 const response = await fetch("/api/history")
-
                 if (response.ok) {
                     const data = await response.json()
                     setHistory(data)
@@ -43,20 +50,13 @@ export default function HistoryPage() {
                 setIsLoading(false)
             }
         }
-
-        if (session) {
-            fetchHistory()
-        } else {
-            setIsLoading(false)
-        }
+        if (session) fetchHistory()
+        else setIsLoading(false)
     }, [session])
 
     const handleDelete = async (id: string) => {
         try {
-            const response = await fetch(`/api/history/${id}`, {
-                method: "DELETE"
-            })
-
+            const response = await fetch(`/api/history/${id}`, { method: "DELETE" })
             if (response.ok) {
                 setHistory(history.filter(item => item._id !== id))
                 toast.success("Record deleted successfully")
@@ -81,25 +81,39 @@ export default function HistoryPage() {
         return parseFloat(rate) > 0 ? `${rate}%` : "0%"
     }
 
+    const uniqueFormats = useMemo(() => {
+        const fmts = new Set(history.map(h => h.afterFormat).filter(Boolean));
+        return Array.from(fmts).sort();
+    }, [history]);
+
+    const displayed = useMemo(() => {
+        let list = [...history];
+        if (typeFilter === 'conversion') list = list.filter(h => !h.removedBg);
+        if (typeFilter === 'removebg') list = list.filter(h => h.removedBg);
+        if (formatFilter !== 'all') list = list.filter(h => h.afterFormat === formatFilter);
+        list.sort((a, b) => {
+            if (sortBy === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            if (sortBy === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            if (sortBy === 'largest') return b.beforeSize - a.beforeSize;
+            if (sortBy === 'smallest') return a.beforeSize - b.beforeSize;
+            return 0;
+        });
+        return list;
+    }, [history, typeFilter, formatFilter, sortBy]);
+
     if (!session) {
         return (
             <div className="container mx-auto py-8 px-4">
                 <h1 className="text-3xl font-bold mb-6">Conversion History</h1>
-                <div className="bg-white border rounded-lg p-8 text-center">
-                    <div className="bg-gray-100 mx-auto h-16 w-16 flex items-center justify-center rounded-full mb-4">
-                        <Lock className="h-8 w-8 text-gray-400" />
+                <div className="bg-card border border-border rounded-lg p-8 text-center">
+                    <div className="bg-muted mx-auto h-16 w-16 flex items-center justify-center rounded-full mb-4">
+                        <Lock className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <h3 className="text-lg font-medium mb-2">Sign in to view history</h3>
-                    <p className="text-gray-500 mb-4">
-                        Create an account or sign in to save and view your conversion history.
-                    </p>
+                    <p className="text-muted-foreground mb-4">Create an account or sign in to save and view your conversion history.</p>
                     <div className="flex gap-4 justify-center">
-                        <Link href="/login">
-                            <Button>Login</Button>
-                        </Link>
-                        <Link href="/register">
-                            <Button variant="outline">Register</Button>
-                        </Link>
+                        <Link href="/login"><Button>Login</Button></Link>
+                        <Link href="/register"><Button variant="outline">Register</Button></Link>
                     </div>
                 </div>
             </div>
@@ -122,72 +136,133 @@ export default function HistoryPage() {
             <h1 className="text-3xl font-bold mb-6">Conversion History</h1>
 
             {history.length === 0 ? (
-                <div className="bg-white border rounded-lg p-8 text-center">
-                    <div className="bg-gray-100 mx-auto h-16 w-16 flex items-center justify-center rounded-full mb-4">
-                        <Clock className="h-8 w-8 text-gray-400" />
+                <div className="bg-card border border-border rounded-lg p-8 text-center">
+                    <div className="bg-muted mx-auto h-16 w-16 flex items-center justify-center rounded-full mb-4">
+                        <Clock className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <h3 className="text-lg font-medium mb-2">No conversion history</h3>
-                    <p className="text-gray-500 mb-4">
-                        You haven&apos;t converted any images yet. Your conversion history will appear here.
-                    </p>
-                    <Link href="/convert">
-                        <Button>Convert an Image</Button>
-                    </Link>
+                    <p className="text-muted-foreground mb-4">You haven&apos;t converted any images yet.</p>
+                    <Link href="/convert"><Button>Convert an Image</Button></Link>
                 </div>
             ) : (
-                <div className="space-y-4">
-                    {history.map((item) => (
-                        <div key={item._id} className="bg-white border rounded-lg p-4 flex flex-col md:flex-row md:items-center">
-                            <div className="md:flex-1 mb-4 md:mb-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="h-8 w-8 bg-blue-100 rounded flex items-center justify-center">
-                                        <FileType className="h-4 w-4 text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <span className="font-medium truncate block max-w-xs">{item.name}</span>
-                                        <div className="flex items-center text-sm text-gray-500 mt-1">
-                                            <span className="uppercase">{item.beforeFormat}</span>
-                                            <ArrowRight className="h-3 w-3 mx-1" />
-                                            <span className="uppercase">{item.afterFormat}</span>
+                <>
+                    {/* Filter & sort controls */}
+                    <div className="flex flex-wrap gap-3 mb-5 items-center bg-card border border-border rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm text-muted-foreground font-medium">Type:</label>
+                            <select
+                                value={typeFilter}
+                                onChange={e => setTypeFilter(e.target.value as TypeFilter)}
+                                className="text-sm border border-input bg-background rounded px-2 py-1"
+                            >
+                                <option value="all">All</option>
+                                <option value="conversion">Format Conversion</option>
+                                <option value="removebg">Background Removal</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm text-muted-foreground font-medium">Format:</label>
+                            <select
+                                value={formatFilter}
+                                onChange={e => setFormatFilter(e.target.value)}
+                                className="text-sm border border-input bg-background rounded px-2 py-1"
+                            >
+                                <option value="all">All</option>
+                                {uniqueFormats.map(f => (
+                                    <option key={f} value={f}>{f.toUpperCase()}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex items-center gap-2 ml-auto">
+                            <label className="text-sm text-muted-foreground font-medium">Sort:</label>
+                            <select
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value as SortOption)}
+                                className="text-sm border border-input bg-background rounded px-2 py-1"
+                            >
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                                <option value="largest">Largest file</option>
+                                <option value="smallest">Smallest file</option>
+                            </select>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{displayed.length} record{displayed.length !== 1 ? 's' : ''}</span>
+                    </div>
+
+                    {displayed.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">No records match the current filters.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {displayed.map((item) => (
+                                <div key={item._id} className="bg-card border border-border rounded-lg p-4 flex flex-col md:flex-row md:items-center">
+                                    <div className="md:flex-1 mb-4 md:mb-0">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className={`h-8 w-8 rounded flex items-center justify-center ${item.removedBg ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-secondary'}`}>
+                                                {item.removedBg
+                                                    ? <ImageIcon className="h-4 w-4 text-purple-600 dark:text-purple-300" />
+                                                    : <FileType className="h-4 w-4 text-primary" />}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium truncate block max-w-xs">{item.name}</span>
+                                                    {item.removedBg && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                                                            BG Removed
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center text-sm text-muted-foreground mt-1">
+                                                    <span className="uppercase">{item.beforeFormat}</span>
+                                                    <ArrowRight className="h-3 w-3 mx-1" />
+                                                    <span className="uppercase">{item.afterFormat}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-2">
+                                            <p>Processed {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</p>
+                                            <p className="mt-1">
+                                                Size: {formatSize(item.beforeSize)} &rarr; {formatSize(item.afterSize)}
+                                                <span className="text-green-600 ml-2">
+                                                    ({calculateCompressionRate(item.beforeSize, item.afterSize)} smaller)
+                                                </span>
+                                            </p>
                                         </div>
                                     </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            title="Share image"
+                                            onClick={() => {
+                                                const url = `${window.location.origin}/view/${item._id}`;
+                                                navigator.clipboard.writeText(url).then(() => toast.success("Share link copied!")).catch(() => toast.error("Failed to copy link"));
+                                            }}
+                                        >
+                                            <Share2 className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                window.location.href = `/api/download?url=${encodeURIComponent(item.url)}&filename=${encodeURIComponent(item.name || `converted-${item.afterFormat}`)}`;
+                                            }}
+                                        >
+                                            <Download className="h-4 w-4 mr-1" /> Download
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            onClick={() => handleDelete(item._id)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-
-                                <div className="text-sm text-gray-500 mt-2">
-                                    <p>Converted {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</p>
-                                    <p className="mt-1">
-                                        Size: {formatSize(item.beforeSize)} &rarr; {formatSize(item.afterSize)}
-                                        <span className="text-green-600 ml-2">
-                                            ({calculateCompressionRate(item.beforeSize, item.afterSize)} smaller)
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                                {/* <Link href={item.url} target="_blank"> */}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            window.location.href = `/api/download?url=${encodeURIComponent(item.url)}&filename=${encodeURIComponent(item.name || `converted-${item.afterFormat}`)}`;
-                                        }}
-                                    >
-                                        <Download className="h-4 w-4 mr-1" /> Download
-                                    </Button>
-                                {/* </Link> */}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-red-600 hover:bg-red-50"
-                                    onClick={() => handleDelete(item._id)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    )}
+                </>
             )}
         </div>
     )

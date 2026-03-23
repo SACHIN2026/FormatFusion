@@ -65,7 +65,7 @@ const plans: PricingPlan[] = [
   {
     id: 'basic',
     name: 'Basic',
-    price: 100, // Amount in paisa (₹1.00)
+    price: 9900, // Amount in paisa (₹99)
     features: [
       'Unlimited conversions',
       'All file formats',
@@ -77,7 +77,7 @@ const plans: PricingPlan[] = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 199, // Amount in paisa (₹1.99)
+    price: 49900, // Amount in paisa (₹499)
     features: [
       'Everything in Basic',
       'Batch processing',
@@ -209,13 +209,13 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">
             Choose Your Plan
           </h2>
-          <p className="mt-4 text-xl text-gray-600">
+          <p className="mt-4 text-xl text-muted-foreground">
             Select the perfect plan for your file conversion needs
           </p>
         </div>
@@ -224,27 +224,27 @@ export default function PricingPage() {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`rounded-lg shadow-lg divide-y divide-gray-200 ${
+              className={`rounded-lg shadow-lg divide-y divide-border ${
                 plan.recommended
                   ? 'border-2 border-blue-500 relative'
-                  : 'border border-gray-200'
+                  : 'border border-border'
               }`}
             >
               {plan.recommended && (
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <span className="inline-flex px-4 py-1 rounded-full text-sm font-semibold tracking-wide uppercase bg-blue-500 text-white">
+                  <span className="inline-flex px-4 py-1 rounded-full text-sm font-semibold tracking-wide uppercase bg-primary text-primary-foreground">
                     Recommended
                   </span>
                 </div>
               )}
-              <div className="p-6 bg-white rounded-t-lg">
-                <h3 className="text-2xl font-semibold text-gray-900">{plan.name}</h3>
+              <div className="p-6 bg-card text-card-foreground rounded-t-lg">
+                <h3 className="text-2xl font-semibold text-foreground">{plan.name}</h3>
                 <p className="mt-4">
-                  <span className="text-4xl font-extrabold text-gray-900">
+                  <span className="text-4xl font-extrabold text-foreground">
                     ₹{plan.price === 0 ? '0' : (plan.price / 100).toFixed(2)}
                   </span>
                   {plan.price > 0 && (
-                    <span className="text-base font-medium text-gray-500">/month</span>
+                    <span className="text-base font-medium text-muted-foreground">/month</span>
                   )}
                 </p>
                 <button
@@ -254,8 +254,8 @@ export default function PricingPage() {
                     plan.recommended
                       ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                       : plan.id === 'free'
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-500'
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring'
                   } ${loading === plan.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loading === plan.id
@@ -267,8 +267,8 @@ export default function PricingPage() {
                     : 'Get Started'}
                 </button>
               </div>
-              <div className="px-6 pt-6 pb-8 bg-gray-50 rounded-b-lg">
-                <h4 className="text-sm font-medium text-gray-900 tracking-wide uppercase">
+              <div className="px-6 pt-6 pb-8 bg-muted/40 rounded-b-lg">
+                <h4 className="text-sm font-medium text-foreground tracking-wide uppercase">
                   What&apos;s included
                 </h4>
                 <ul className="mt-6 space-y-4">
@@ -285,7 +285,7 @@ export default function PricingPage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-sm text-gray-500">{feature}</span>
+                      <span className="text-sm text-muted-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>

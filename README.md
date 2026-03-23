@@ -57,6 +57,12 @@ A modern web application for image format conversion, background removal, and im
    - `RAZORPAY_KEY_ID`: Your Razorpay key ID
    - `RAZORPAY_KEY_SECRET`: Your Razorpay key secret
    - `NEXT_PUBLIC_RAZORPAY_KEY_ID`: Your Razorpay key ID (public)
+   - `SMTP_HOST`: SMTP server host (e.g. smtp.gmail.com)
+   - `SMTP_PORT`: SMTP port (587 for STARTTLS, 465 for SSL)
+   - `SMTP_USER`: SMTP username/email
+   - `SMTP_PASS`: SMTP password or app password
+   - `SMTP_FROM`: Sender display + email (e.g. "FormatFusion" <noreply@yourdomain.com>)
+   - `PASSWORD_RESET_BASE_URL`: Public website URL used in reset email links
 
 4. Run the development server:
    ```bash
@@ -64,6 +70,15 @@ A modern web application for image format conversion, background removal, and im
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Protected Environment (Safe Mode)
+
+Use protected mode to prevent accidental use of production-like values during development.
+
+```bash
+cp .env.protected.example .env.local
+npm run dev:protected
+```
 
 ## Deployment
 
@@ -79,6 +94,12 @@ Make sure to set these environment variables in your production environment:
 - `RAZORPAY_KEY_ID`: Razorpay live key ID
 - `RAZORPAY_KEY_SECRET`: Razorpay live key secret
 - `NEXT_PUBLIC_RAZORPAY_KEY_ID`: Razorpay live key ID (public)
+- `SMTP_HOST`: SMTP server host
+- `SMTP_PORT`: SMTP server port
+- `SMTP_USER`: SMTP username/email
+- `SMTP_PASS`: SMTP password/app password
+- `SMTP_FROM`: Sender display + email
+- `PASSWORD_RESET_BASE_URL`: Public website URL used in reset email links
 
 ### Vercel Deployment
 
@@ -104,6 +125,7 @@ The app can be deployed on any platform that supports Next.js:
 - `/api/razorpay/verify-payment` - Verify payment
 - `/api/subscription/status` - Get subscription status
 - `/api/history` - User conversion history
+- `/api/apikey` - Generate/revoke API key for programmatic access
 
 ## Contributing
 

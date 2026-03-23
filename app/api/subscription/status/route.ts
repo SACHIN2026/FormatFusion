@@ -26,11 +26,33 @@ export async function GET() {
       );
     }
 
+    // Check and auto-expire subscription
+    const isActive = user.subscriptionStatus === 'active' &&
+      user.subscriptionCurrentPeriodEnd &&
+      new Date(user.subscriptionCurrentPeriodEnd) > new Date();
+    if (user.subscriptionStatus === 'active' && !isActive) {
+      await User.updateOne({ _id: user._id }, { $set: { subscriptionStatus: 'expired' } });
+      user.subscriptionStatus = 'expired';
+    }
+
+    // Get this month's conversion count
+    const { default: History } = await import('@/models/History');
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const conversionCount = await History.countDocuments({
+      userId: user._id,
+      createdAt: { $gte: startOfMonth },
+    });
+
     return NextResponse.json({
       subscription: {
         status: user.subscriptionStatus || 'free',
         plan: user.subscriptionPlan || 'free',
         currentPeriodEnd: user.subscriptionCurrentPeriodEnd || null,
+        createdAt: user.createdAt || null,
+        conversionCount,
+        conversionLimit: (user.subscriptionStatus === 'active' && isActive) ? null : 5,
       }
     });
 

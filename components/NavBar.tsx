@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
+import { useTheme } from "next-themes"
+import { Sun, Moon } from "lucide-react"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -18,7 +20,8 @@ import Image from "next/image"
 
 export default function NavBar() {
   const pathname = usePathname()
-  const { data: session } = useSession() // Get session only
+  const { data: session } = useSession()
+  const { theme, setTheme } = useTheme()
 
   return (
     <div className="border-b">
@@ -39,7 +42,7 @@ export default function NavBar() {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      pathname === "/" && "text-blue-600 bg-blue-50"
+                      pathname === "/" && "bg-accent text-accent-foreground"
                     )}
                   >
                     Home
@@ -53,7 +56,7 @@ export default function NavBar() {
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        pathname === "/convert" && "text-blue-600 bg-blue-50"
+                        pathname === "/convert" && "bg-accent text-accent-foreground"
                       )}
                     >
                       Convert
@@ -68,7 +71,7 @@ export default function NavBar() {
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        pathname === "/removebackground" && "text-blue-600 bg-blue-50"
+                        pathname === "/removebackground" && "bg-accent text-accent-foreground"
                       )}
                     >
                       Remove BG
@@ -84,7 +87,7 @@ export default function NavBar() {
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        pathname === "/history" && "text-blue-600 bg-blue-50"
+                        pathname === "/history" && "bg-accent text-accent-foreground"
                       )}
                     >
                       History
@@ -100,7 +103,7 @@ export default function NavBar() {
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        pathname === "/dashboard" && "text-blue-600 bg-blue-50"
+                        pathname === "/dashboard" && "bg-accent text-accent-foreground"
                       )}
                     >
                       Dashboard
@@ -114,7 +117,7 @@ export default function NavBar() {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      pathname === "/pricing" && "text-blue-600 bg-blue-50"
+                      pathname === "/pricing" && "bg-accent text-accent-foreground"
                     )}
                   >
                     Pricing
@@ -127,7 +130,7 @@ export default function NavBar() {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      pathname === "/about" && "text-blue-600 bg-blue-50"
+                      pathname === "/about" && "bg-accent text-accent-foreground"
                     )}
                   >
                     About
@@ -141,8 +144,17 @@ export default function NavBar() {
         {/*history in navbar is not showing properly when login */}
 
 
-        {/* Login/Signup buttons on right */}
+        {/* Right: theme toggle + auth buttons */}
         <div className="flex items-center gap-2">
+          {/* Dark mode toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           {session ? (
             <div className="flex items-center gap-3">
               <span className="text-sm hidden md:inline">

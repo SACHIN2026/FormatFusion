@@ -4,7 +4,7 @@ import User from "@/models/User";
 
 export async function POST(request : NextRequest){
     try {
-       const {email, password} =  await request.json()
+    const {name, email, password} =  await request.json()
 
        if(!email || !password){
             return NextResponse.json(
@@ -24,7 +24,9 @@ export async function POST(request : NextRequest){
        }
 
        await User.create({
-        email, password
+        name: typeof name === 'string' && name.trim() ? name.trim() : undefined,
+        email,
+        password
        });
 
        return NextResponse.json(
