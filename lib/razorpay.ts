@@ -18,13 +18,13 @@ export const razorpayInstance = new Razorpay({
 export const PLANS = {
   basic: {
     name: 'Basic Plan',
-    amount: 100, // ₹1.00 in paise
+    amount: 9900, // ₹99.00 in paise
     currency: 'INR',
     description: 'Unlimited conversions with priority support',
   },
   premium: {
     name: 'Premium Plan', 
-    amount: 199, // ₹1.99 in paise
+    amount: 49900, // ₹499.00 in paise
     currency: 'INR',
     description: 'Everything in Basic + Batch processing + API access',
   },
